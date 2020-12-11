@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/KrishnaSindhur/data-tree/pkg/contract"
 )
 
 const (

@@ -3,8 +3,6 @@ package handler
 import (
 	"context"
 	"net/http"
-
-	"github.com/KrishnaSindhur/data-tree/contract"
 )
 
 type TreeReader interface {
