@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//Todo should mock the service layer
+//Todo should mock the service layer for all tests
 func Test_Add_ShouldBeAbleToPostData(t *testing.T) {
 	requestBody := `{"dim": [{"key": "device","val": "mobile"},{"key": "country","val": "IN"}],"metrics": [{"key": "webreq","val": 70},{"key": "timespent","val": 30}]}`
 	req, _ := http.NewRequest(http.MethodPost, "/data-tree/v1/insert", strings.NewReader(requestBody))

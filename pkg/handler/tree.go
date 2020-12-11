@@ -11,6 +11,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+var tree = contract.Tree{}
+
 func Get(tree contract.Tree) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var requestQuery contract.Query
@@ -40,11 +42,11 @@ func Add(tree contract.Tree) http.HandlerFunc {
 			return
 		}
 
-		err := service.AddData(r.Context(), requestData, tree)
+		updatedTree, err := service.AddData(r.Context(), requestData, tree)
 		if err != nil {
 			log.Err(err)
 		}
-
+		tree = updatedTree
 		w.WriteHeader(http.StatusOK)
 	}
 }

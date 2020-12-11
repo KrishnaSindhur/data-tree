@@ -11,7 +11,8 @@ func GetData(ctx context.Context, data contract.Query, tree contract.Tree) (cont
 }
 
 //TODO condense the code
-func AddData(ctx context.Context, data contract.Data, tree contract.Tree) error {
+//Todo type safety to move constants or enums
+func AddData(ctx context.Context, data contract.Data, tree contract.Tree) (contract.Tree, error) {
 	var country, device string
 	var webReq, timeSpent int
 	for _, d := range data.Dim {
@@ -30,14 +31,16 @@ func AddData(ctx context.Context, data contract.Data, tree contract.Tree) error 
 			timeSpent = m.Value
 		}
 	}
+
 	for _, l3 := range tree.Level3 {
 		if l3.Device == device && l3.Country == country {
 			tree = updateData(tree, webReq, timeSpent, l3)
-			return nil
+			return tree, nil
 		}
 	}
+
 	tree = insertData(tree, device, country, webReq, timeSpent)
-	return nil
+	return tree, nil
 }
 
 //internal function
