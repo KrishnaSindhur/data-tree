@@ -2,15 +2,17 @@ package lib
 
 import (
 	"encoding/json"
-	"github.com/rs/zerolog"
-	"github.com/KrishnaSindhur/data-tree/pkg/contract"
 	"io"
+
+	"github.com/KrishnaSindhur/data-tree/pkg/contract"
+
+	"github.com/rs/zerolog/log"
 )
 
-func WriteResponseJSON(w io.Writer, responseData interface{}, logger zerolog.Logger) {
-	response := contract.Response{Data: responseData}
+func WriteResponseJSON(w io.Writer, responseData interface{}) {
+	response := contract.Response{Output: responseData}
 	err := json.NewEncoder(w).Encode(response)
 	if err != nil {
-		logger.Error().Err(err).Msg("Could not write JSON response")
+		log.Error().Err(err).Msg("Could not write JSON response")
 	}
 }

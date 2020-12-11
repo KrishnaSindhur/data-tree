@@ -1,16 +1,49 @@
 package handler
 
 import (
-	"context"
+	"encoding/json"
 	"net/http"
+
+	"github.com/KrishnaSindhur/data-tree/pkg/contract"
+	"github.com/KrishnaSindhur/data-tree/pkg/lib"
+	"github.com/KrishnaSindhur/data-tree/pkg/service"
+
+	"github.com/rs/zerolog/log"
 )
 
-type TreeReader interface {
-	GetData(ctx context.Context) (error)
+func Get(tree contract.Tree) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var requestQuery contract.Query
+		if err := json.NewDecoder(r.Body).Decode(&requestQuery); err != nil {
+			log.Error().Msg("Malformed request body")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		data, err := service.GetData(r.Context(), requestQuery, tree)
+		if err != nil {
+			log.Err(err)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		lib.WriteResponseJSON(w, data)
+	}
 }
 
-func GetData(treeReader TreeReader) http.HandlerFunc {
+func Add(tree contract.Tree) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+
+		var requestData contract.Data
+		if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+			log.Error().Msg("Malformed request body")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		err := service.AddData(r.Context(), requestData, tree)
+		if err != nil {
+			log.Err(err)
+		}
 
 		w.WriteHeader(http.StatusOK)
 	}
