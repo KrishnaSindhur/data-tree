@@ -1,0 +1,30 @@
+# OS
+.DS_Store
+*.tmp
+
+# IDE & editors
+.idea/
+*.iml
+*~
+*.swp
+*.swo
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.tgz
+*.deb
+
+# Test binary, built with `go test -c`
+*.test
+
+# Dependency directories
+vendor/
+
+#zipped files
+*.zip
+
+.idea
