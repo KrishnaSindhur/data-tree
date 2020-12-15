@@ -1,18 +1,31 @@
 package service
 
 import (
-	"context"
-
 	"github.com/KrishnaSindhur/data-tree/pkg/contract"
 )
 
-func GetData(ctx context.Context, data contract.Query, tree contract.Tree) (contract.Data, error){
+
+func GetData(query contract.Query, tree contract.Node) (contract.Data, error) {
+	var country string
+	for _, d := range query.Data {
+		if d.Key == "country" {
+			country = d.Value
+		}
+	}
+	for _, nodeLevel1 := range tree.Children {
+		var metrics []contract.Metrics
+		if nodeLevel1.MetaData == country {
+			metrics = append(metrics, contract.Metrics{Key: "webreq", Value: nodeLevel1.WebReq})
+			metrics = append(metrics, contract.Metrics{Key: "timespent", Value: nodeLevel1.TimeSpent})
+			var dim []contract.Dimensions
+			dim = append(dim, contract.Dimensions{Key: "country", Value: country})
+			return contract.Data{Dim: dim, Met: metrics}, nil
+		}
+	}
 	return contract.Data{}, nil
 }
 
-//TODO condense the code
-//Todo type safety to move constants or enums
-func AddData(ctx context.Context, data contract.Data, tree contract.Tree) (contract.Tree, error) {
+func AddData(data contract.Data, tree *contract.Node) error {
 	var country, device string
 	var webReq, timeSpent int
 	for _, d := range data.Dim {
@@ -31,44 +44,44 @@ func AddData(ctx context.Context, data contract.Data, tree contract.Tree) (contr
 			timeSpent = m.Value
 		}
 	}
-
-	for _, l3 := range tree.Level3 {
-		if l3.Device == device && l3.Country == country {
-			tree = updateData(tree, webReq, timeSpent, l3)
-			return tree, nil
-		}
+	if len(tree.Children) == 0 {
+		tree.WebReq = webReq
+		tree.TimeSpent = timeSpent
+		var node2 [] *contract.Node
+		node2 = append(node2, &contract.Node{MetaData: device, WebReq: webReq, TimeSpent: timeSpent})
+		node1 := contract.Node{MetaData: country, WebReq: webReq, TimeSpent: timeSpent, Children: node2}
+		tree.Children = append(tree.Children, &node1)
+		return nil
 	}
 
-	tree = insertData(tree, device, country, webReq, timeSpent)
-	return tree, nil
-}
-
-//internal function
-//to insert data either level2 that is country and then level3 device
-// or level 3 that is if given device missing got the country
-func insertData(tree contract.Tree, device string, country string, webReq int, timeSpent int)  contract.Tree {
-	tree.Level1.WebReq += webReq
-	tree.Level1.TimeSpent += timeSpent
-	for _, l2 := range tree.Level2 {
-		if l2.Country == country {
-			l2.WebReq += webReq
-			l2.TimeSpent += timeSpent
+	for _, nodeLevel1 := range tree.Children {
+		if nodeLevel1.MetaData == country {
+			for _, nodeLevel2 := range nodeLevel1.Children {
+				if nodeLevel2.MetaData == device {
+					tree.WebReq += webReq
+					tree.TimeSpent += timeSpent
+					nodeLevel1.WebReq += webReq
+					nodeLevel1.TimeSpent += timeSpent
+					nodeLevel2.WebReq += webReq
+					nodeLevel2.TimeSpent += timeSpent
+					return nil
+				}
+			}
+			tree.WebReq += webReq
+			tree.TimeSpent += timeSpent
+			nodeLevel1.WebReq += webReq
+			nodeLevel1.TimeSpent += timeSpent
+			var node2 []*contract.Node
+			node2 = append(node2, &contract.Node{MetaData: device, WebReq: webReq, TimeSpent: timeSpent})
+			nodeLevel1.Children = node2
+			return nil
 		}
-		tree.Level3 = append(tree.Level3, contract.Node3{Device: device, Node2: l2})
-		return tree
 	}
-	tree.Level2 = append(tree.Level2, contract.Node2{Country: country, Node1: tree.Level1})
-	tree.Level3 = append(tree.Level3, contract.Node3{Device: device, Node2: contract.Node2{Country: country, Node1: tree.Level1}})
-	return tree
-}
-
-// internal function if already present the dimension
-func updateData(tree contract.Tree, webReq int, timeSpent int, level3 contract.Node3) contract.Tree{
-	tree.Level1.WebReq += webReq
-	tree.Level1.TimeSpent += timeSpent
-	level3.Node1.TimeSpent += timeSpent
-	level3.Node1.WebReq += webReq
-	level3.Node2.TimeSpent += timeSpent
-	level3.Node2.WebReq += webReq
-	return tree
+	tree.WebReq += webReq
+	tree.TimeSpent += timeSpent
+	var node2 [] *contract.Node
+	node2 = append(node2, &contract.Node{MetaData: device, WebReq: webReq, TimeSpent: timeSpent})
+	node1 := contract.Node{MetaData: country, WebReq: webReq, TimeSpent: timeSpent, Children: node2}
+	tree.Children = append(tree.Children, &node1)
+	return nil
 }

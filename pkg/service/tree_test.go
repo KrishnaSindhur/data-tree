@@ -1,7 +1,6 @@
 package service_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/KrishnaSindhur/data-tree/pkg/contract"
@@ -10,39 +9,69 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_AddData_EmptyShouldBeAbleToGiveEmptyTree(t *testing.T) {
-	ctx := context.Background()
-	tree := contract.Tree{}
+func Test_AddData_AddingEmptyDataForTree(t *testing.T) {
+	tree := contract.Node{}
+	tree.WebReq = 140
+	tree.TimeSpent = 60
+	var node2 [] *contract.Node
+	node2 = append(node2, &contract.Node{MetaData: "mobile", WebReq: 140, TimeSpent: 60})
+	node1 := contract.Node{MetaData: "IN", WebReq: 140, TimeSpent: 60, Children: node2}
+	tree.Children = append(tree.Children, &node1)
 	data := contract.Data{}
-	expected := contract.Tree{Level1:contract.Node1{WebReq:0, TimeSpent:0}, Level2:[]contract.Node2{contract.Node2{Country:"", Node1:contract.Node1{WebReq:0, TimeSpent:0}}},
-				Level3:[]contract.Node3{contract.Node3{Device:"", Node2:contract.Node2{Country:"", Node1:contract.Node1{WebReq:0, TimeSpent:0}}}}}
 
-	treeData, err := service.AddData(ctx, data, tree)
+	err := service.AddData(data, &tree)
 
 	assert.NoError(t, err)
-	assert.Equal(t, expected, treeData, "expected value is not matching with actual value")
 }
 
-func Test_AddData_ShouldBeAbleToRespondData(t *testing.T) {
-	ctx := context.Background()
-	tree := contract.Tree{}
-	dimensions := []contract.Dimensions{}
-	metrics := []contract.Metrics{}
-	dimensions = append(dimensions, contract.Dimensions{Key: "device", Value: "mobile"})
-	dimensions = append(dimensions, contract.Dimensions{Key: "country", Value: "IN"})
-	metrics = append(metrics, contract.Metrics{Key: "webreq", Value: 70})
-	metrics = append(metrics, contract.Metrics{Key: "timespent", Value: 30})
-	data := contract.Data{Dim: dimensions, Met: metrics}
+func Test_AddData_AddingEmptyTree(t *testing.T) {
+	var dim []contract.Dimensions
+	var met []contract.Metrics
+	dim = append(dim, contract.Dimensions{Key: "country", Value: "IN"})
+	dim = append(dim, contract.Dimensions{Key: "device", Value: "mobile"})
+	met = append(met, contract.Metrics{Key: "webreq", Value: 140})
+	met = append(met, contract.Metrics{Key: "timespent", Value: 60})
+	data := contract.Data{Dim: dim, Met: met}
+	tree := contract.Node{}
 
-	node1 := contract.Node1{WebReq: 70, TimeSpent: 30}
-	var node2 []contract.Node2
-	node2 = append(node2, contract.Node2{Country: "IN", Node1:node1})
-	var node3 []contract.Node3
-	node3 = append(node3, contract.Node3{Device: "mobile", Node2:contract.Node2{Country: "IN", Node1:node1}})
-	expectedValue := contract.Tree{Level1: node1, Level2: node2, Level3: node3}
-
-	treeData, err := service.AddData(ctx, data, tree)
+	err := service.AddData(data, &tree)
 
 	assert.NoError(t, err)
-	assert.Equal(t, expectedValue, treeData, "expected value is not matching with actual value")
+}
+
+func Test_GetData_GetTreeDataForGivenQuery(t *testing.T) {
+	var dim []contract.Dimensions
+	dim = append(dim, contract.Dimensions{Key: "country", Value: "IN"})
+	query := contract.Query{Data: dim}
+
+	tree := contract.Node{}
+	tree.WebReq = 140
+	tree.TimeSpent = 60
+	var node2 [] *contract.Node
+	node2 = append(node2, &contract.Node{MetaData: "mobile", WebReq: 140, TimeSpent: 60})
+	node1 := contract.Node{MetaData: "IN", WebReq: 140, TimeSpent: 60, Children: node2}
+	tree.Children = append(tree.Children, &node1)
+
+	var dim1 []contract.Dimensions
+	var met []contract.Metrics
+	dim1 = append(dim1, contract.Dimensions{Key: "country", Value: "IN"})
+	met = append(met, contract.Metrics{Key: "webreq", Value: 140})
+	met = append(met, contract.Metrics{Key: "timespent", Value: 60})
+	expectedData := contract.Data{Dim: dim1, Met: met}
+
+	data, err := service.GetData(query, tree)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedData,  data, "Unexpected value")
+}
+
+func Test_GetData_GetTreeDataForEmptyTree(t *testing.T) {
+	var dim []contract.Dimensions
+	dim = append(dim, contract.Dimensions{Key: "country", Value: "IN"})
+	query := contract.Query{Data: dim}
+
+	data, err := service.GetData(query, contract.Node{})
+
+	assert.NoError(t, err)
+	assert.Equal(t, contract.Data{},  data, "Unexpected value")
 }

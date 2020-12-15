@@ -10,7 +10,6 @@ import (
 	"syscall"
 
 	"github.com/KrishnaSindhur/data-tree/pkg/constants"
-	"github.com/KrishnaSindhur/data-tree/pkg/contract"
 	"github.com/KrishnaSindhur/data-tree/pkg/handler"
 
 	"github.com/gorilla/mux"
@@ -89,8 +88,7 @@ func serve() {
 
 func InitializeRoutes() http.Handler {
 	router := mux.NewRouter()
-
-	router.HandleFunc(DataInsertPath, handler.Add(contract.Tree{})).Methods(http.MethodPost)
-	//router.HandleFunc(DataQueryPath, handler.Get(contract.Tree{})).Methods(http.MethodGet)
+	router.HandleFunc(DataInsertPath, handler.Add()).Methods(http.MethodPost)
+	router.HandleFunc(DataQueryPath, handler.Get()).Methods(http.MethodGet)
 	return router
 }

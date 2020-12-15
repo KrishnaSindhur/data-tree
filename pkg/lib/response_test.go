@@ -15,5 +15,5 @@ func TestWriteResponseJSON(t *testing.T) {
 
 	lib.WriteResponseJSON(&w, response)
 
-	assert.JSONEq(t, `{"data":{"A": "one", "B": "two"}}`, w.String(), "Incorrect response written")
+	assert.JSONEq(t, `{"output":{"A": "one", "B": "two"}}`, w.String(), "Incorrect response written")
 }
