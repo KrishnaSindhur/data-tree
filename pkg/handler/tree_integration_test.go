@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_Add_ShouldBeAbleToPostData(t *testing.T) {
+func Test_Add_ShouldBeAbleToAddDataToTree(t *testing.T) {
 	requestBody := `{"dim": [{"key": "device","val": "mobile"},{"key": "country","val": "IN"}],"metrics": [{"key": "webreq","val": 70},{"key": "timespent","val": 30}]}`
 	req, _ := http.NewRequest(http.MethodPost, "/data-tree/v1/insert", strings.NewReader(requestBody))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -24,7 +24,7 @@ func Test_Add_ShouldBeAbleToPostData(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code, "Incorrect HTTP status code")
 }
 
-func Test_Add_ShouldBeAbleToPostDataIfSomeKeyIsMissing(t *testing.T) {
+func Test_Add_ShouldBeAbleToAddDataToTreeIfSomeKeyIsMissing(t *testing.T) {
 	requestBody := `{"dim": [{"key": "country","val": "IN"}],"metrics": [{"key": "webreq","val": 70},{"key": "timespent","val": 30}]}`
 	req, _ := http.NewRequest(http.MethodPost, "/data-tree/v1/insert", strings.NewReader(requestBody))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
